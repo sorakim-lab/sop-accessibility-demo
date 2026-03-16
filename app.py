@@ -36,15 +36,6 @@ if "current_page" not in st.session_state:
 
 
 # =========================================================
-# Home query param
-# =========================================================
-if "home" in st.query_params:
-    st.session_state.query_input = ""
-    st.session_state.current_page = 1
-    st.query_params.clear()
-
-
-# =========================================================
 # Helpers
 # =========================================================
 def set_query(term: str):
@@ -68,7 +59,7 @@ def go_next_page(total_pages: int):
 
 
 # =========================================================
-# CSS — iOS / clean product vibe
+# CSS — minimal / iOS-ish
 # =========================================================
 st.markdown("""
 <style>
@@ -91,7 +82,7 @@ st.markdown("""
     }
 
     .hero-wrap {
-        margin-bottom: 1.3rem;
+        margin-bottom: 1.25rem;
     }
 
     .hero-title {
@@ -104,7 +95,7 @@ st.markdown("""
     }
 
     .hero-subtitle {
-        font-size: 1.05rem;
+        font-size: 1.04rem;
         color: #667085;
         line-height: 1.7;
     }
@@ -211,11 +202,11 @@ st.markdown("""
     }
 
     .result-title {
-        font-size: 1.05rem;
-        font-weight: 750;
+        font-size: 1.1rem;
+        font-weight: 780;
         color: #0f172a;
-        line-height: 1.5;
-        margin-bottom: 0.6rem;
+        line-height: 1.45;
+        margin-bottom: 0.8rem;
     }
 
     .result-meta {
@@ -230,7 +221,7 @@ st.markdown("""
 
     .result-snippet {
         color: #475467;
-        font-size: 0.96rem;
+        font-size: 0.97rem;
         line-height: 1.82;
     }
 
@@ -413,22 +404,50 @@ def load_data():
 
 
 # =========================================================
-# Data utils
+# Text utils
 # =========================================================
 def extract_title(text: str) -> str:
     if not text:
         return "Untitled SOP"
-    match = re.split(r"\\b1\\.\\s*Purpose\\b", text, maxsplit=1, flags=re.IGNORECASE)
-    title = match[0].strip() if match else text.strip()
+
+    clean = re.sub(r"\s+", " ", text).strip()
+
+    split_patterns = [
+        r"\b1\.\s*Purpose\b",
+        r"\b1\.\s*Objective\b",
+        r"\bPurpose\b",
+        r"\bObjective\b",
+        r"\bScope\b"
+    ]
+
+    title = clean
+    for pattern in split_patterns:
+        parts = re.split(pattern, clean, maxsplit=1, flags=re.IGNORECASE)
+        if len(parts) > 1 and parts[0].strip():
+            title = parts[0].strip()
+            break
+
+    title = re.sub(r"[:\-–]\s*$", "", title).strip()
+
     if not title:
-        title = text[:60].strip()
-    return title
+        title = clean[:80].strip()
+
+    return title[:140]
+
+
+def remove_title_from_text(text: str, title: str) -> str:
+    if not text:
+        return ""
+    clean = re.sub(r"\s+", " ", text).strip()
+    if title and clean.lower().startswith(title.lower()):
+        clean = clean[len(title):].strip(" .:-")
+    return clean
 
 
 def make_snippet(text: str, max_len: int = 240) -> str:
     if not text:
         return ""
-    clean = re.sub(r"\\s+", " ", text).strip()
+    clean = re.sub(r"\s+", " ", text).strip()
     if len(clean) <= max_len:
         return clean
     return clean[:max_len].rstrip() + "..."
@@ -454,6 +473,9 @@ def get_match_badge(count: int) -> str:
     return f"<span class='badge {cls}'>{label}</span>"
 
 
+# =========================================================
+# Search logic
+# =========================================================
 def build_results(query: str, keyword_df: pd.DataFrame, parsed_df: pd.DataFrame) -> pd.DataFrame:
     query_norm = query.strip().lower()
     if not query_norm:
@@ -478,13 +500,17 @@ def build_results(query: str, keyword_df: pd.DataFrame, parsed_df: pd.DataFrame)
     merged["text"] = merged["text"].fillna("").astype(str)
     merged["clean_text"] = (
         merged["text"]
-        .str.replace(r"\\s+", " ", regex=True)
+        .str.replace(r"\s+", " ", regex=True)
         .str.strip()
     )
 
     merged["keyword_count"] = merged["clean_text"].str.lower().str.count(re.escape(query_norm))
     merged["document_title"] = merged["clean_text"].apply(extract_title)
-    merged["snippet"] = merged["clean_text"].apply(make_snippet)
+    merged["body_text"] = merged.apply(
+        lambda row: remove_title_from_text(row["clean_text"], row["document_title"]),
+        axis=1
+    )
+    merged["snippet"] = merged["body_text"].apply(make_snippet)
 
     merged = merged.drop_duplicates(subset=["sop_id", "page"]).copy()
     merged = merged.sort_values(
@@ -591,8 +617,7 @@ st.markdown(
     <div class="hero-wrap">
         <div class="hero-title">📄 SOP Accessibility Search</div>
         <div class="hero-subtitle">
-            Keyword-based retrieval interface for synthetic GMP-style SOPs ·
-            HCI research prototype
+            Search interface for synthetic GMP-style SOPs · HCI research prototype
         </div>
     </div>
     """,
@@ -837,7 +862,7 @@ st.markdown('<div id="bottom-anchor" class="anchor-offset"></div>', unsafe_allow
 
 
 # =========================================================
-# Floating nav (home removed)
+# Floating nav
 # =========================================================
 st.markdown(
     """
