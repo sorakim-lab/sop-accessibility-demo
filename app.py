@@ -15,16 +15,11 @@ LOG_FILE = Path("search_logs.csv")
 QUERY_OUTCOME_FILE = Path("query_outcomes.csv")
 
 # -----------------------------
-# Home query-param handling
+# Query-param handling
 # -----------------------------
 if "home" in st.query_params:
-    if "pending_query" not in st.session_state:
-        st.session_state.pending_query = ""
-    if "home_reset_counter" not in st.session_state:
-        st.session_state.home_reset_counter = 0
-
     st.session_state.pending_query = ""
-    st.session_state.home_reset_counter += 1
+    st.session_state.home_reset_counter = st.session_state.get("home_reset_counter", 0) + 1
     st.query_params.clear()
 
 # -----------------------------
@@ -32,212 +27,294 @@ if "home" in st.query_params:
 # -----------------------------
 st.markdown("""
 <style>
-    /* 전체 배경 */
     .stApp {
-        background-color: #f7f8fc;
+        background: #f6f8fb;
     }
 
-    /* 검색창 스타일 */
-    .stTextInput > div > div > input {
-        border-radius: 12px;
-        border: 1.5px solid #d0d5dd;
-        padding: 10px 16px;
-        font-size: 1rem;
-        background: #ffffff;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        transition: border-color 0.2s ease;
-    }
-    .stTextInput > div > div > input:focus {
-        border-color: #4f8ef7;
-        box-shadow: 0 0 0 3px rgba(79,142,247,0.12);
+    .block-container {
+        padding-top: 2.2rem;
+        padding-bottom: 4rem;
+        max-width: 1200px;
     }
 
-    /* 결과 카드 */
-    .result-card {
-        background: #ffffff;
-        border: 1px solid #e4e8ef;
-        border-radius: 14px;
-        padding: 18px 22px;
-        margin-bottom: 14px;
-        box-shadow: 0 2px 10px rgba(15,23,42,0.05);
-        transition: box-shadow 0.2s ease, transform 0.2s ease;
-    }
-    .result-card:hover {
-        box-shadow: 0 6px 24px rgba(15,23,42,0.10);
-        transform: translateY(-2px);
+    /* header */
+    .hero-wrap {
+        padding: 0.2rem 0 1.1rem 0;
     }
 
-    /* 제목 */
-    .result-title {
-        font-size: 1.05rem;
-        font-weight: 600;
-        color: #111827;
-        margin-bottom: 6px;
-        line-height: 1.4;
+    .hero-title {
+        font-size: 2.75rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        color: #1f2937;
+        margin-bottom: 0.35rem;
     }
 
-    /* 메타 (SOP ID, page) */
-    .result-meta {
-        font-size: 0.82rem;
+    .hero-subtitle {
+        font-size: 1.02rem;
         color: #6b7280;
-        margin-bottom: 10px;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        flex-wrap: wrap;
+        line-height: 1.65;
+        margin-bottom: 0.6rem;
     }
 
-    /* 뱃지 */
-    .badge {
-        display: inline-block;
-        padding: 2px 10px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 500;
-    }
-    .badge-blue {
-        background: #eff6ff;
-        color: #3b82f6;
-        border: 1px solid #bfdbfe;
-    }
-    .badge-green {
-        background: #f0fdf4;
-        color: #16a34a;
-        border: 1px solid #bbf7d0;
-    }
-    .badge-yellow {
-        background: #fefce8;
-        color: #ca8a04;
-        border: 1px solid #fde68a;
-    }
-
-    /* 스니펫 */
-    .result-snippet {
-        font-size: 0.93rem;
-        line-height: 1.75;
-        color: #374151;
-    }
-
-    /* 하이라이트 */
-    mark {
-        background-color: #fff3a3;
-        padding: 1px 3px;
-        border-radius: 3px;
-    }
-
-    /* 섹션 헤더 */
-    .section-header {
-        font-size: 0.75rem;
-        font-weight: 600;
+    /* section label */
+    .section-label {
+        font-size: 0.78rem;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: #9ca3af;
-        margin-bottom: 12px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid #e5e7eb;
+        color: #98a2b3;
+        margin-top: 1rem;
+        margin-bottom: 0.8rem;
     }
 
-    /* 사이드바 히스토리 버튼 */
+    /* search box */
+    div[data-testid="stTextInput"] input {
+        border-radius: 16px !important;
+        border: 1.5px solid #d9e0ea !important;
+        background: #ffffff !important;
+        min-height: 56px !important;
+        padding: 0 18px !important;
+        font-size: 1rem !important;
+        color: #111827 !important;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    div[data-testid="stTextInput"] input:focus {
+        border-color: #7aa2ff !important;
+        box-shadow: 0 0 0 4px rgba(122, 162, 255, 0.14) !important;
+    }
+
+    /* default button */
     .stButton > button {
-        border-radius: 10px;
-        font-size: 0.85rem;
-        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        border: 1px solid #dde3ec;
         background: #ffffff;
-        color: #374151;
+        color: #334155;
+        min-height: 44px;
+        font-weight: 500;
+        box-shadow: none;
         transition: all 0.18s ease;
-        width: 100%;
-        text-align: left;
-        padding: 6px 12px;
     }
+
     .stButton > button:hover {
-        background: #f0f4ff;
-        border-color: #c7d7fd;
+        border-color: #bfd1ff;
+        background: #f8fbff;
         color: #1d4ed8;
     }
 
-    /* suggestion pill */
+    /* home button */
+    div[data-testid="column"]:last-child .stButton > button {
+        min-height: 56px;
+        border-radius: 16px;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    /* suggestion chip buttons */
+    .suggestion-row {
+        margin-top: 0.2rem;
+        margin-bottom: 0.2rem;
+    }
+
     div[data-testid="column"] .stButton > button {
-        border-radius: 999px;
-        padding: 5px 14px;
-        background: #f1f5f9;
-        border: 1px solid #e2e8f0;
-        color: #475569;
-        font-size: 0.82rem;
-        width: auto;
-    }
-    div[data-testid="column"] .stButton > button:hover {
-        background: #e8f0fe;
-        border-color: #93c5fd;
-        color: #1d4ed8;
+        width: 100%;
     }
 
-    /* empty state */
-    .empty-state {
-        text-align: center;
-        padding: 48px 24px;
-        color: #9ca3af;
-    }
-    .empty-state .emoji {
-        font-size: 2.5rem;
-        margin-bottom: 12px;
-    }
-    .empty-state p {
-        font-size: 0.95rem;
-        margin: 4px 0;
+    .chip-caption {
+        color: #94a3b8;
+        font-size: 0.92rem;
+        margin-top: 0.15rem;
+        margin-bottom: 0.9rem;
     }
 
     /* stats bar */
     .stats-bar {
-        background: #f1f5f9;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 10px 16px;
-        font-size: 0.85rem;
-        color: #64748b;
-        margin-bottom: 16px;
         display: flex;
-        gap: 16px;
         flex-wrap: wrap;
+        gap: 14px;
+        background: #ffffff;
+        border: 1px solid #e6ebf2;
+        border-radius: 16px;
+        padding: 14px 18px;
+        margin-top: 0.3rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+        font-size: 0.92rem;
+        color: #667085;
+    }
+
+    .stats-bar strong {
+        color: #111827;
+    }
+
+    /* result card */
+    .result-card {
+        background: #ffffff;
+        border: 1px solid #e7ecf3;
+        border-radius: 18px;
+        padding: 20px 22px 18px 22px;
+        margin-bottom: 14px;
+        box-shadow: 0 6px 24px rgba(15, 23, 42, 0.05);
+    }
+
+    .result-title {
+        font-size: 1.06rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.45;
+        margin-bottom: 0.55rem;
+    }
+
+    .result-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 0.9rem;
+        color: #64748b;
+        font-size: 0.82rem;
+    }
+
+    .result-snippet {
+        font-size: 0.95rem;
+        color: #475467;
+        line-height: 1.8;
+    }
+
+    /* badges */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .badge-sop {
+        background: #eef4ff;
+        color: #2456d3;
+        border: 1px solid #d8e4ff;
+    }
+
+    .badge-page {
+        background: #f8fafc;
+        color: #475467;
+        border: 1px solid #e2e8f0;
+    }
+
+    .badge-green {
+        background: #ecfdf3;
+        color: #027a48;
+        border: 1px solid #d1fadf;
+    }
+
+    .badge-blue {
+        background: #eff8ff;
+        color: #175cd3;
+        border: 1px solid #d1e9ff;
+    }
+
+    .badge-yellow {
+        background: #fffaeb;
+        color: #b54708;
+        border: 1px solid #fedf89;
+    }
+
+    /* highlight */
+    mark {
+        background: #fff1a8;
+        color: inherit;
+        padding: 0 4px;
+        border-radius: 6px;
+    }
+
+    /* empty state */
+    .empty-state {
+        background: #ffffff;
+        border: 1px solid #e7ecf3;
+        border-radius: 20px;
+        padding: 44px 24px;
+        text-align: center;
+        color: #94a3b8;
+        box-shadow: 0 6px 24px rgba(15, 23, 42, 0.04);
+    }
+
+    .empty-emoji {
+        font-size: 2.2rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .empty-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.35rem;
+    }
+
+    .empty-text {
+        font-size: 0.95rem;
+        line-height: 1.7;
+        color: #667085;
+    }
+
+    /* anchor */
+    .anchor-offset {
+        position: relative;
+        top: -8px;
+        visibility: hidden;
     }
 
     /* floating nav */
     .floating-nav {
         position: fixed;
         right: 22px;
-        bottom: 28px;
+        bottom: 26px;
         display: flex;
         flex-direction: column;
         gap: 10px;
         z-index: 9999;
     }
+
     .floating-nav a {
-        width: 44px;
-        height: 44px;
+        width: 46px;
+        height: 46px;
         border-radius: 999px;
-        background: #ffffff;
-        border: 1px solid #dbe2ea;
-        box-shadow: 0 4px 14px rgba(15,23,42,0.10);
+        background: rgba(255,255,255,0.95);
+        border: 1px solid #dbe4ee;
+        box-shadow: 0 8px 24px rgba(15,23,42,0.10);
         display: flex;
         align-items: center;
         justify-content: center;
         text-decoration: none;
         color: #334155;
-        font-size: 1.1rem;
-        font-weight: 600;
+        font-size: 1.05rem;
+        font-weight: 700;
         transition: all 0.18s ease;
+        backdrop-filter: blur(10px);
     }
+
     .floating-nav a:hover {
-        background: #f0f4ff;
-        border-color: #bfd2ff;
+        background: #f8fbff;
+        border-color: #c7d7fd;
         color: #1d4ed8;
         transform: translateY(-1px);
     }
 
-    /* anchor spacing */
-    .anchor-offset {
-        position: relative;
-        top: -10px;
-        visibility: hidden;
+    /* sidebar polish */
+    section[data-testid="stSidebar"] {
+        background: #fbfcfe;
+        border-right: 1px solid #edf1f6;
+    }
+
+    /* feedback buttons */
+    .feedback-label {
+        font-size: 0.85rem;
+        color: #98a2b3;
+        margin-top: -0.2rem;
+        margin-bottom: 0.5rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -245,9 +322,26 @@ st.markdown("""
 # -----------------------------
 # Data loading
 # -----------------------------
+@st.cache_data
 def load_data():
     keyword_df = pd.read_csv("keyword_index.csv")
     parsed_df = pd.read_csv("parsed_pages.csv")
+
+    keyword_df.columns = [c.strip() for c in keyword_df.columns]
+    parsed_df.columns = [c.strip() for c in parsed_df.columns]
+
+    required_keyword_cols = {"keyword", "sop_id", "page"}
+    required_parsed_cols = {"sop_id", "page_number", "text"}
+
+    if not required_keyword_cols.issubset(set(keyword_df.columns)):
+        raise ValueError(
+            f"keyword_index.csv must contain columns: {sorted(required_keyword_cols)}"
+        )
+
+    if not required_parsed_cols.issubset(set(parsed_df.columns)):
+        raise ValueError(
+            f"parsed_pages.csv must contain columns: {sorted(required_parsed_cols)}"
+        )
 
     keyword_df["keyword"] = (
         keyword_df["keyword"]
@@ -256,11 +350,14 @@ def load_data():
         .str.strip()
         .str.lower()
     )
-    parsed_df["text"] = (
-        parsed_df["text"]
-        .fillna("")
-        .astype(str)
-    )
+
+    keyword_df["sop_id"] = keyword_df["sop_id"].astype(str)
+    keyword_df["page"] = pd.to_numeric(keyword_df["page"], errors="coerce")
+
+    parsed_df["sop_id"] = parsed_df["sop_id"].astype(str)
+    parsed_df["page_number"] = pd.to_numeric(parsed_df["page_number"], errors="coerce")
+    parsed_df["text"] = parsed_df["text"].fillna("").astype(str)
+
     return keyword_df, parsed_df
 
 
@@ -277,7 +374,7 @@ def extract_title(text: str) -> str:
     return title
 
 
-def make_snippet(text: str, max_len: int = 220) -> str:
+def make_snippet(text: str, max_len: int = 240) -> str:
     if not text:
         return ""
     clean = re.sub(r"\s+", " ", text).strip()
@@ -290,10 +387,7 @@ def highlight_keyword(text: str, query: str) -> str:
     if not text or not query:
         return text
     pattern = re.compile(re.escape(query), re.IGNORECASE)
-    return pattern.sub(
-        lambda m: f"<mark>{m.group(0)}</mark>",
-        text
-    )
+    return pattern.sub(lambda m: f"<mark>{m.group(0)}</mark>", text)
 
 
 def get_match_badge(count: int) -> str:
@@ -309,11 +403,7 @@ def get_match_badge(count: int) -> str:
     return f"<span class='badge {cls}'>{label}</span>"
 
 
-def build_results(
-    query: str,
-    keyword_df: pd.DataFrame,
-    parsed_df: pd.DataFrame
-) -> pd.DataFrame:
+def build_results(query: str, keyword_df: pd.DataFrame, parsed_df: pd.DataFrame) -> pd.DataFrame:
     query_norm = query.strip().lower()
     if not query_norm:
         return pd.DataFrame()
@@ -341,26 +431,20 @@ def build_results(
         .str.strip()
     )
 
-    merged["keyword_count"] = merged["clean_text"].str.lower().str.count(
-        re.escape(query_norm)
-    )
-
+    merged["keyword_count"] = merged["clean_text"].str.lower().str.count(re.escape(query_norm))
     merged["document_title"] = merged["clean_text"].apply(extract_title)
     merged["snippet"] = merged["clean_text"].apply(make_snippet)
 
     merged = merged.drop_duplicates(subset=["sop_id", "page"]).copy()
     merged = merged.sort_values(
-        by="keyword_count", ascending=False
+        by=["keyword_count", "sop_id", "page"],
+        ascending=[False, True, True]
     ).reset_index(drop=True)
 
     return merged
 
 
-def append_search_log(
-    query: str,
-    results_df: pd.DataFrame,
-    found: str = "unknown"
-) -> None:
+def append_search_log(query: str, results_df: pd.DataFrame, found: str = "unknown") -> None:
     if results_df.empty:
         return
 
@@ -400,13 +484,23 @@ def append_query_outcome(query: str, found: bool) -> None:
         outcome_df.to_csv(QUERY_OUTCOME_FILE, index=False, encoding="utf-8-sig")
 
 
-# -----------------------------
-# Load data
-# -----------------------------
-keyword_df, parsed_df = load_data()
+def render_suggestion_grid(suggestions, cols_per_row=4):
+    for i in range(0, len(suggestions), cols_per_row):
+        row_terms = suggestions[i:i + cols_per_row]
+        cols = st.columns(cols_per_row)
+        for j in range(cols_per_row):
+            with cols[j]:
+                if j < len(row_terms):
+                    term = row_terms[j]
+                    if st.button(term, key=f"suggestion_{term}", use_container_width=True):
+                        st.session_state.pending_query = term
+                        st.rerun()
+                else:
+                    st.empty()
+
 
 # -----------------------------
-# Session state
+# Session state init
 # -----------------------------
 if "search_history" not in st.session_state:
     st.session_state.search_history = []
@@ -424,7 +518,16 @@ if "home_reset_counter" not in st.session_state:
     st.session_state.home_reset_counter = 0
 
 # -----------------------------
-# Floating nav anchors
+# Load data
+# -----------------------------
+try:
+    keyword_df, parsed_df = load_data()
+except Exception as e:
+    st.error(f"Data loading error: {e}")
+    st.stop()
+
+# -----------------------------
+# Top anchor
 # -----------------------------
 st.markdown('<div id="top-anchor" class="anchor-offset"></div>', unsafe_allow_html=True)
 
@@ -432,8 +535,8 @@ st.markdown('<div id="top-anchor" class="anchor-offset"></div>', unsafe_allow_ht
 # Sidebar
 # -----------------------------
 with st.sidebar:
-    st.markdown("### 📋 Search History")
-    st.caption("Click to search again")
+    st.markdown("### Search History")
+    st.caption("Click any previous query to run it again")
 
     if st.session_state.search_history:
         recent = list(dict.fromkeys(reversed(st.session_state.search_history)))
@@ -442,91 +545,98 @@ with st.sidebar:
                 st.session_state.pending_query = q
                 st.rerun()
     else:
-        st.markdown(
-            "<div style='color:#aaa; font-size:0.85rem;'>No searches yet.</div>",
-            unsafe_allow_html=True
-        )
+        st.caption("No searches yet")
 
     st.divider()
 
-    st.markdown("### 📊 Session Stats")
+    st.markdown("### Session Stats")
     total_searches = len(st.session_state.search_history)
     found_count = sum(1 for v in st.session_state.feedback.values() if v is True)
     not_found_count = sum(1 for v in st.session_state.feedback.values() if v is False)
 
     st.metric("Total searches", total_searches)
-    col1, col2 = st.columns(2)
-    col1.metric("✅ Found", found_count)
-    col2.metric("❌ Not found", not_found_count)
+    c1, c2 = st.columns(2)
+    c1.metric("Found", found_count)
+    c2.metric("Not found", not_found_count)
 
     st.divider()
     st.caption("SOP Accessibility Research Prototype · 2026")
 
 # -----------------------------
-# Main UI
+# Main header
 # -----------------------------
-st.markdown("## 📄 SOP Accessibility Search")
-st.caption(
-    "Keyword-based retrieval interface for synthetic GMP-style SOP documents · "
-    "HCI research prototype"
+st.markdown(
+    """
+    <div class="hero-wrap">
+        <div class="hero-title">📄 SOP Accessibility Search</div>
+        <div class="hero-subtitle">
+            Keyword-based retrieval interface for synthetic GMP-style SOP documents ·
+            HCI research prototype
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
 st.markdown('<div id="search-anchor" class="anchor-offset"></div>', unsafe_allow_html=True)
 
+# -----------------------------
+# Search bar
+# -----------------------------
 default_query = st.session_state.pending_query
 st.session_state.pending_query = ""
 
-top_col1, top_col2 = st.columns([6, 1])
+search_col, home_col = st.columns([7.2, 1])
 
-with top_col1:
+with search_col:
     query = st.text_input(
-        "Enter keyword",
+        "Search",
         value=default_query,
         placeholder="e.g., sterility, bioburden, endotoxin",
         label_visibility="collapsed",
         key=f"query_box_{st.session_state.home_reset_counter}"
     )
 
-with top_col2:
-    if st.button("🏠 Home"):
+with home_col:
+    if st.button("🏠 Home", use_container_width=True):
         st.session_state.pending_query = ""
         st.session_state.home_reset_counter += 1
         st.rerun()
 
 # -----------------------------
-# Suggested queries (empty state)
+# Suggestions / empty state
 # -----------------------------
 SUGGESTIONS = [
-    "sterility", "endotoxin", "bioburden",
-    "environmental", "sampling", "monitoring",
-    "preparation", "protein"
+    "sterility",
+    "endotoxin",
+    "bioburden",
+    "environmental",
+    "sampling",
+    "monitoring",
+    "preparation",
+    "protein"
 ]
 
 if not query:
-    st.markdown(
-        "<div class='section-header'>💡 Suggested searches</div>",
-        unsafe_allow_html=True
-    )
-    cols = st.columns(len(SUGGESTIONS))
-    for col, s in zip(cols, SUGGESTIONS):
-        if col.button(s, key=f"sug_{s}"):
-            st.session_state.pending_query = s
-            st.rerun()
+    st.markdown("<div class='section-label'>Suggested Searches</div>", unsafe_allow_html=True)
+    render_suggestion_grid(SUGGESTIONS, cols_per_row=4)
 
     st.markdown(
         """
-        <div class='empty-state'>
-            <div class='emoji'>🔬</div>
-            <p><strong>Search GMP-style SOP documents</strong></p>
-            <p>Enter a keyword above to find relevant procedures,<br>
-            specifications, and methods across the SOP corpus.</p>
+        <div class="empty-state" style="margin-top: 1rem;">
+            <div class="empty-emoji">🔬</div>
+            <div class="empty-title">Search synthetic GMP-style SOP documents</div>
+            <div class="empty-text">
+                Enter a keyword above to find relevant procedures, methods,
+                specifications, and document sections across the SOP corpus.
+            </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
 # -----------------------------
-# Search & results
+# Search / results
 # -----------------------------
 if query:
     if query not in st.session_state.search_history:
@@ -534,23 +644,19 @@ if query:
 
     merged = build_results(query, keyword_df, parsed_df)
 
-    st.markdown(
-        "<div id='results-anchor' class='anchor-offset'></div>",
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        "<div class='section-header'>Search Results</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown('<div id="results-anchor" class="anchor-offset"></div>', unsafe_allow_html=True)
+    st.markdown("<div class='section-label'>Search Results</div>", unsafe_allow_html=True)
 
     if merged.empty:
         st.markdown(
             f"""
-            <div class='empty-state'>
-                <div class='emoji'>🔍</div>
-                <p><strong>No results found for "{query}"</strong></p>
-                <p>Try a different keyword or check the spelling.</p>
+            <div class="empty-state">
+                <div class="empty-emoji">🔍</div>
+                <div class="empty-title">No results found for "{query}"</div>
+                <div class="empty-text">
+                    Try a different keyword, broaden the term,
+                    or check the spelling.
+                </div>
             </div>
             """,
             unsafe_allow_html=True
@@ -562,11 +668,11 @@ if query:
         unique_sops = top_results["sop_id"].nunique()
         st.markdown(
             f"""
-            <div class='stats-bar'>
-                📁 <strong>{len(merged)}</strong> section(s) found across
-                <strong>{unique_sops}</strong> SOP(s) ·
-                Showing top <strong>{len(top_results)}</strong> results ·
-                Sorted by relevance
+            <div class="stats-bar">
+                <span>📁 <strong>{len(merged)}</strong> section(s) found</span>
+                <span>🧾 across <strong>{unique_sops}</strong> SOP(s)</span>
+                <span>⭐ showing top <strong>{len(top_results)}</strong> results</span>
+                <span>↕ sorted by relevance</span>
             </div>
             """,
             unsafe_allow_html=True
@@ -580,33 +686,33 @@ if query:
 
             feedback_val = st.session_state.feedback.get(card_key)
             if feedback_val is True:
-                feedback_indicator = "✅"
+                feedback_indicator = " ✅"
             elif feedback_val is False:
-                feedback_indicator = "❌"
+                feedback_indicator = " ❌"
             else:
                 feedback_indicator = ""
 
             st.markdown(
                 f"""
-                <div class='result-card'>
-                    <div class='result-title'>
-                        📄 {highlighted_title} {feedback_indicator}
-                    </div>
-                    <div class='result-meta'>
-                        <span class='badge badge-blue'>{row['sop_id']}</span>
-                        <span>Page {row['page']}</span>
+                <div class="result-card">
+                    <div class="result-title">📄 {highlighted_title}{feedback_indicator}</div>
+                    <div class="result-meta">
+                        <span class="badge badge-sop">{row['sop_id']}</span>
+                        <span class="badge badge-page">Page {int(row['page']) if pd.notna(row['page']) else '-'}</span>
                         {match_badge}
                     </div>
-                    <div class='result-snippet'>{highlighted_snippet}</div>
+                    <div class="result-snippet">{highlighted_snippet}</div>
                 </div>
                 """,
                 unsafe_allow_html=True
             )
 
             if feedback_val is None:
-                fb_col1, fb_col2, fb_col3 = st.columns([1, 1, 6])
-                with fb_col1:
-                    if st.button("✅ Found", key=f"found_{card_key}_{idx}"):
+                st.markdown("<div class='feedback-label'>Was this result helpful?</div>", unsafe_allow_html=True)
+                fb1, fb2, fb3 = st.columns([1, 1, 6])
+
+                with fb1:
+                    if st.button("✅ Found", key=f"found_{card_key}_{idx}", use_container_width=True):
                         st.session_state.feedback[card_key] = True
                         append_search_log(
                             query,
@@ -614,8 +720,9 @@ if query:
                             found="yes"
                         )
                         st.rerun()
-                with fb_col2:
-                    if st.button("❌ Not this", key=f"notfound_{card_key}_{idx}"):
+
+                with fb2:
+                    if st.button("❌ Not this", key=f"notfound_{card_key}_{idx}", use_container_width=True):
                         st.session_state.feedback[card_key] = False
                         append_search_log(
                             query,
@@ -624,44 +731,45 @@ if query:
                         )
                         st.rerun()
 
-        st.markdown(
-            "<div class='section-header'>Did you find what you were looking for?</div>",
-            unsafe_allow_html=True
-        )
+                st.write("")
 
+        st.markdown("<div class='section-label'>Overall Search Feedback</div>", unsafe_allow_html=True)
         query_feedback = st.session_state.query_outcome_feedback.get(query)
 
         if query_feedback is None:
-            q_col1, q_col2, q_col3 = st.columns([1, 1, 6])
+            q1, q2, q3 = st.columns([1, 1, 6])
 
-            with q_col1:
-                if st.button("✅ Yes", key=f"query_yes_{query}"):
+            with q1:
+                if st.button("✅ Yes", key=f"query_yes_{query}", use_container_width=True):
                     st.session_state.query_outcome_feedback[query] = True
                     append_query_outcome(query, True)
                     st.rerun()
 
-            with q_col2:
-                if st.button("❌ No", key=f"query_no_{query}"):
+            with q2:
+                if st.button("❌ No", key=f"query_no_{query}", use_container_width=True):
                     st.session_state.query_outcome_feedback[query] = False
                     append_query_outcome(query, False)
                     st.rerun()
         else:
             if query_feedback is True:
-                st.success("Marked as successful search.")
+                st.success("Marked as a successful search.")
             else:
-                st.error("Marked as unsuccessful search.")
+                st.error("Marked as an unsuccessful search.")
 
+# -----------------------------
+# Bottom anchor
+# -----------------------------
 st.markdown('<div id="bottom-anchor" class="anchor-offset"></div>', unsafe_allow_html=True)
 
 # -----------------------------
-# Floating scroll controls
+# Floating controls
 # -----------------------------
 st.markdown(
     """
     <div class="floating-nav">
-        <a href="#top-anchor" title="Page up">↑</a>
-        <a href="?home=1" title="Go home">⌂</a>
-        <a href="#bottom-anchor" title="Page down">↓</a>
+        <a href="#top-anchor" title="Top">↑</a>
+        <a href="?home=1" title="Home">⌂</a>
+        <a href="#bottom-anchor" title="Bottom">↓</a>
     </div>
     """,
     unsafe_allow_html=True
