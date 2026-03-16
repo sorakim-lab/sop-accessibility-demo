@@ -68,7 +68,7 @@ def go_next_page(total_pages: int):
 
 
 # =========================================================
-# CSS — iOS-ish / clean product vibe
+# CSS — iOS / clean product vibe
 # =========================================================
 st.markdown("""
 <style>
@@ -78,30 +78,33 @@ st.markdown("""
 
     .block-container {
         max-width: 1180px;
-        padding-top: 2.2rem;
+        padding-top: 2.1rem;
         padding-bottom: 4rem;
+        padding-left: 2rem;
+        padding-right: 2rem;
     }
 
     section[data-testid="stSidebar"] {
-        background: rgba(255,255,255,0.70);
+        background: rgba(255,255,255,0.72);
         backdrop-filter: blur(18px);
         border-right: 1px solid rgba(15,23,42,0.06);
     }
 
     .hero-wrap {
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.3rem;
     }
 
     .hero-title {
-        font-size: 3.1rem;
+        font-size: 3rem;
         font-weight: 800;
         letter-spacing: -0.05em;
         color: #1f2937;
         margin-bottom: 0.35rem;
+        line-height: 1.05;
     }
 
     .hero-subtitle {
-        font-size: 1.06rem;
+        font-size: 1.05rem;
         color: #667085;
         line-height: 1.7;
     }
@@ -116,17 +119,20 @@ st.markdown("""
         margin-bottom: 0.8rem;
     }
 
-    /* Search input wrapper */
+    div[data-testid="stTextInput"] {
+        overflow: visible !important;
+    }
+
     div[data-testid="stTextInput"] > div {
-        background: transparent !important;
+        overflow: visible !important;
     }
 
     div[data-testid="stTextInput"] input {
-        height: 60px !important;
-        min-height: 60px !important;
+        height: 58px !important;
+        min-height: 58px !important;
         border-radius: 18px !important;
         border: 1px solid #dbe3ee !important;
-        background: rgba(255,255,255,0.88) !important;
+        background: rgba(255,255,255,0.90) !important;
         backdrop-filter: blur(14px);
         padding: 0 20px !important;
         font-size: 1rem !important;
@@ -139,18 +145,18 @@ st.markdown("""
         box-shadow: 0 0 0 4px rgba(59,130,246,0.10), 0 8px 24px rgba(15,23,42,0.08) !important;
     }
 
-    /* Default buttons */
     .stButton > button {
         width: 100%;
-        min-height: 46px;
+        min-height: 44px;
         border-radius: 16px;
         border: 1px solid #d9e2ec;
-        background: rgba(255,255,255,0.82);
+        background: rgba(255,255,255,0.84);
         color: #334155;
-        font-size: 0.97rem;
+        font-size: 0.96rem;
         font-weight: 600;
         box-shadow: 0 6px 18px rgba(15,23,42,0.04);
         transition: all 0.18s ease;
+        white-space: nowrap;
     }
 
     .stButton > button:hover {
@@ -160,18 +166,13 @@ st.markdown("""
         transform: translateY(-1px);
     }
 
-    .stButton > button:active {
-        transform: translateY(0px);
+    .stButton > button:disabled {
+        opacity: 0.55;
+        background: rgba(255,255,255,0.78);
+        color: #94a3b8;
+        border-color: #e2e8f0;
     }
 
-    /* Suggestion chips */
-    .chip-note {
-        color: #98a2b3;
-        font-size: 0.92rem;
-        margin-bottom: 0.8rem;
-    }
-
-    /* stats */
     .stats-bar {
         display: flex;
         flex-wrap: wrap;
@@ -185,15 +186,22 @@ st.markdown("""
         box-shadow: 0 8px 24px rgba(15,23,42,0.05);
         color: #667085;
         font-size: 0.93rem;
+        line-height: 1.6;
     }
 
     .stats-bar strong {
         color: #111827;
     }
 
-    /* result card */
+    .pager-note {
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.93rem;
+        padding-top: 0.75rem;
+    }
+
     .result-card {
-        background: rgba(255,255,255,0.88);
+        background: rgba(255,255,255,0.90);
         backdrop-filter: blur(16px);
         border: 1px solid #e7edf5;
         border-radius: 22px;
@@ -274,7 +282,7 @@ st.markdown("""
     }
 
     .empty-state {
-        background: rgba(255,255,255,0.84);
+        background: rgba(255,255,255,0.86);
         border: 1px solid #e8edf4;
         border-radius: 24px;
         box-shadow: 0 10px 28px rgba(15,23,42,0.05);
@@ -327,7 +335,7 @@ st.markdown("""
         width: 48px;
         height: 48px;
         border-radius: 999px;
-        background: rgba(255,255,255,0.88);
+        background: rgba(255,255,255,0.90);
         backdrop-filter: blur(16px);
         border: 1px solid #dce4ee;
         box-shadow: 0 10px 24px rgba(15,23,42,0.10);
@@ -346,6 +354,17 @@ st.markdown("""
         border-color: #bfd2ff;
         color: #1d4ed8;
         transform: translateY(-1px);
+    }
+
+    @media (max-width: 900px) {
+        .hero-title {
+            font-size: 2.35rem;
+        }
+
+        .block-container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -399,7 +418,7 @@ def load_data():
 def extract_title(text: str) -> str:
     if not text:
         return "Untitled SOP"
-    match = re.split(r"\b1\.\s*Purpose\b", text, maxsplit=1, flags=re.IGNORECASE)
+    match = re.split(r"\\b1\\.\\s*Purpose\\b", text, maxsplit=1, flags=re.IGNORECASE)
     title = match[0].strip() if match else text.strip()
     if not title:
         title = text[:60].strip()
@@ -409,7 +428,7 @@ def extract_title(text: str) -> str:
 def make_snippet(text: str, max_len: int = 240) -> str:
     if not text:
         return ""
-    clean = re.sub(r"\s+", " ", text).strip()
+    clean = re.sub(r"\\s+", " ", text).strip()
     if len(clean) <= max_len:
         return clean
     return clean[:max_len].rstrip() + "..."
@@ -459,7 +478,7 @@ def build_results(query: str, keyword_df: pd.DataFrame, parsed_df: pd.DataFrame)
     merged["text"] = merged["text"].fillna("").astype(str)
     merged["clean_text"] = (
         merged["text"]
-        .str.replace(r"\s+", " ", regex=True)
+        .str.replace(r"\\s+", " ", regex=True)
         .str.strip()
     )
 
@@ -572,7 +591,7 @@ st.markdown(
     <div class="hero-wrap">
         <div class="hero-title">📄 SOP Accessibility Search</div>
         <div class="hero-subtitle">
-            Keyword-based retrieval interface for synthetic GMP-style SOP documents ·
+            Keyword-based retrieval interface for synthetic GMP-style SOPs ·
             HCI research prototype
         </div>
     </div>
@@ -580,13 +599,11 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.markdown('<div id="search-anchor" class="anchor-offset"></div>', unsafe_allow_html=True)
-
 
 # =========================================================
 # Search bar
 # =========================================================
-search_col, home_col = st.columns([7.6, 1.0], gap="small")
+search_col, home_col = st.columns([7.2, 1.0], gap="medium")
 
 with search_col:
     query = st.text_input(
@@ -622,17 +639,29 @@ if not query:
 
     for col, term in zip(row1, SUGGESTIONS[:4]):
         with col:
-            st.button(term, key=f"suggestion_{term}", on_click=set_query, args=(term,), use_container_width=True)
+            st.button(
+                term,
+                key=f"suggestion_{term}",
+                on_click=set_query,
+                args=(term,),
+                use_container_width=True
+            )
 
     for col, term in zip(row2, SUGGESTIONS[4:]):
         with col:
-            st.button(term, key=f"suggestion_{term}", on_click=set_query, args=(term,), use_container_width=True)
+            st.button(
+                term,
+                key=f"suggestion2_{term}",
+                on_click=set_query,
+                args=(term,),
+                use_container_width=True
+            )
 
     st.markdown(
         """
         <div class="empty-state" style="margin-top: 1rem;">
             <div class="empty-emoji">🔬</div>
-            <div class="empty-title">Search synthetic GMP-style SOP documents</div>
+            <div class="empty-title">Search synthetic GMP-style SOPs</div>
             <div class="empty-text">
                 Enter a keyword above to find relevant procedures, methods,
                 specifications, and document sections across the SOP corpus.
@@ -652,7 +681,6 @@ if query:
 
     merged = build_results(query, keyword_df, parsed_df)
 
-    st.markdown('<div id="results-anchor" class="anchor-offset"></div>', unsafe_allow_html=True)
     st.markdown("<div class='section-label'>Search Results</div>", unsafe_allow_html=True)
 
     if merged.empty:
@@ -696,9 +724,9 @@ if query:
             unsafe_allow_html=True
         )
 
-        nav1, nav2, nav3 = st.columns([1, 4, 1])
+        nav_left, nav_mid, nav_right = st.columns([1.25, 2.5, 1.25], gap="large")
 
-        with nav1:
+        with nav_left:
             st.button(
                 "← Previous",
                 on_click=go_prev_page,
@@ -706,13 +734,13 @@ if query:
                 use_container_width=True
             )
 
-        with nav2:
+        with nav_mid:
             st.markdown(
-                f"<div style='text-align:center; color:#94a3b8; font-size:0.92rem; padding-top:0.8rem;'>Showing results {start_idx + 1}–{min(end_idx, total_results)} of {total_results}</div>",
+                f"<div class='pager-note'>Showing results {start_idx + 1}–{min(end_idx, total_results)} of {total_results}</div>",
                 unsafe_allow_html=True
             )
 
-        with nav3:
+        with nav_right:
             st.button(
                 "Next →",
                 on_click=go_next_page,
@@ -754,7 +782,7 @@ if query:
 
             if feedback_val is None:
                 st.markdown("<div class='feedback-label'>Was this result helpful?</div>", unsafe_allow_html=True)
-                fb1, fb2, fb3 = st.columns([1.2, 1.2, 6])
+                fb1, fb2, fb3 = st.columns([1.15, 1.15, 6], gap="small")
 
                 with fb1:
                     if st.button("✅ Found", key=f"found_{card_key}_{idx}", use_container_width=True):
@@ -782,7 +810,7 @@ if query:
         query_feedback = st.session_state.query_outcome_feedback.get(query)
 
         if query_feedback is None:
-            q1, q2, q3 = st.columns([1.2, 1.2, 6])
+            q1, q2, q3 = st.columns([1.15, 1.15, 6], gap="small")
 
             with q1:
                 if st.button("✅ Yes", key=f"query_yes_{query}", use_container_width=True):
@@ -809,13 +837,12 @@ st.markdown('<div id="bottom-anchor" class="anchor-offset"></div>', unsafe_allow
 
 
 # =========================================================
-# Floating nav
+# Floating nav (home removed)
 # =========================================================
 st.markdown(
     """
     <div class="floating-nav">
         <a href="#top-anchor" title="Top">↑</a>
-        <a href="?home=1" title="Home">⌂</a>
         <a href="#bottom-anchor" title="Bottom">↓</a>
     </div>
     """,
