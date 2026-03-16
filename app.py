@@ -14,6 +14,7 @@ st.set_page_config(
 LOG_FILE = Path("search_logs.csv")
 QUERY_OUTCOME_FILE = Path("query_outcomes.csv")
 RESULTS_PER_PAGE = 5
+STUDY_FORM_URL = "https://forms.gle/ce7QgjasyPBSXudm7"
 
 
 # =========================================================
@@ -98,6 +99,44 @@ st.markdown("""
         font-size: 1.04rem;
         color: #667085;
         line-height: 1.7;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-top: 1rem;
+        margin-bottom: 0.25rem;
+        flex-wrap: wrap;
+    }
+
+    .study-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 18px;
+        border-radius: 16px;
+        border: 1px solid #cfe0ff;
+        background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+        color: #1d4ed8 !important;
+        font-size: 0.96rem;
+        font-weight: 700;
+        text-decoration: none !important;
+        box-shadow: 0 8px 20px rgba(59,130,246,0.10);
+        transition: all 0.18s ease;
+    }
+
+    .study-button:hover {
+        background: #f4f8ff;
+        border-color: #a9c5ff;
+        transform: translateY(-1px);
+        color: #1e40af !important;
+    }
+
+    .study-note {
+        font-size: 0.9rem;
+        color: #94a3b8;
     }
 
     .section-label {
@@ -297,6 +336,10 @@ st.markdown("""
         font-size: 0.96rem;
         color: #667085;
         line-height: 1.8;
+    }
+
+    .empty-actions {
+        margin-top: 1.15rem;
     }
 
     mark {
@@ -613,11 +656,17 @@ st.markdown('<div id="top-anchor" class="anchor-offset"></div>', unsafe_allow_ht
 # Header
 # =========================================================
 st.markdown(
-    """
+    f"""
     <div class="hero-wrap">
         <div class="hero-title">📄 SOP Accessibility Search</div>
         <div class="hero-subtitle">
             Search interface for synthetic GMP-style SOPs · HCI research prototype
+        </div>
+        <div class="hero-actions">
+            <a class="study-button" href="{STUDY_FORM_URL}" target="_blank" rel="noopener noreferrer">
+                Participate in Study ↗
+            </a>
+            <span class="study-note">Try the prototype, then share quick feedback in the survey.</span>
         </div>
     </div>
     """,
@@ -683,13 +732,18 @@ if not query:
             )
 
     st.markdown(
-        """
+        f"""
         <div class="empty-state" style="margin-top: 1rem;">
             <div class="empty-emoji">🔬</div>
             <div class="empty-title">Search synthetic GMP-style SOPs</div>
             <div class="empty-text">
                 Enter a keyword above to find relevant procedures, methods,
                 specifications, and document sections across the SOP corpus.
+            </div>
+            <div class="empty-actions">
+                <a class="study-button" href="{STUDY_FORM_URL}" target="_blank" rel="noopener noreferrer">
+                    Participate in Study ↗
+                </a>
             </div>
         </div>
         """,
@@ -717,6 +771,11 @@ if query:
                 <div class="empty-text">
                     Try a different keyword, broaden the term,
                     or check the spelling.
+                </div>
+                <div class="empty-actions">
+                    <a class="study-button" href="{STUDY_FORM_URL}" target="_blank" rel="noopener noreferrer">
+                        Participate in Study ↗
+                    </a>
                 </div>
             </div>
             """,
