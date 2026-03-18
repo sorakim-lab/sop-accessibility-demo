@@ -193,8 +193,17 @@ html, body, [data-testid="stAppViewContainer"], .stApp {
 [data-testid="stToolbar"],footer { display:none !important; }
 
 .block-container {
-    max-width: 1300px !important;
-    padding: 20px 20px 40px 20px !important;
+    max-width: 100% !important;
+    padding: 20px 16px 40px 16px !important;
+}
+
+/* prevent horizontal overflow */
+html, body {
+    overflow-x: hidden !important;
+}
+
+.stApp > div {
+    overflow-x: hidden !important;
 }
 [data-testid="stVerticalBlock"] > div:empty { display:none !important; }
 
