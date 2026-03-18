@@ -43,20 +43,26 @@ if "feedback"               not in st.session_state: st.session_state.feedback =
 if "query_outcome_feedback" not in st.session_state: st.session_state.query_outcome_feedback = {}
 if "current_page"           not in st.session_state: st.session_state.current_page = 1
 if "toast_msg"              not in st.session_state: st.session_state.toast_msg = None
+if "pending_query"          not in st.session_state: st.session_state.pending_query = None
 
 if st.session_state.toast_msg:
     st.toast(st.session_state.toast_msg)
     st.session_state.toast_msg = None
 
+if st.session_state.pending_query is not None:
+    st.session_state.query_input = st.session_state.pending_query
+    st.session_state.pending_query = None
+    st.session_state.current_page = 1
+
 # =========================================================
 # Helpers
 # =========================================================
 def set_query(term: str):
-    st.session_state.query_input = term
+    st.session_state.pending_query = term
     st.session_state.current_page = 1
 
 def go_home():
-    st.session_state.query_input = ""
+    st.session_state.pending_query = ""
     st.session_state.current_page = 1
 
 def go_prev_page():
@@ -307,7 +313,8 @@ with st.sidebar:
         recent = list(dict.fromkeys(reversed(st.session_state.search_history)))
         for q in recent[:10]:
             if st.button(f"🔍  {q}", key=f"hist_{q}", use_container_width=True):
-                set_query(q)
+                st.session_state.pending_query = q
+                st.session_state.current_page = 1
                 st.rerun()
     else:
         render('<div style="font-size:13px;color:#9ca3af;padding:0 4px;">No searches yet.</div>')
@@ -426,12 +433,14 @@ if not query:
     for col, term in zip(row1, SUGGESTIONS[:4]):
         with col:
             if st.button(term, key=f"s1_{term}", use_container_width=True):
-                set_query(term)
+                st.session_state.pending_query = term
+                st.session_state.current_page = 1
                 st.rerun()
     for col, term in zip(row2, SUGGESTIONS[4:]):
         with col:
             if st.button(term, key=f"s2_{term}", use_container_width=True):
-                set_query(term)
+                st.session_state.pending_query = term
+                st.session_state.current_page = 1
                 st.rerun()
 
     render(f"""
