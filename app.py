@@ -560,37 +560,39 @@ if query:
             highlighted_title   = highlight_keyword(row["document_title"], query)
             highlighted_snippet = highlight_keyword(row["snippet"], query)
 
-            render(f"""
-            <div style="{CARD}border-left:4px solid {score_color};">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;
-                  flex-wrap:wrap;gap:12px;margin-bottom:12px;">
-                <div style="flex:1;">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-                    <span style="font-size:12px;font-weight:700;font-family:'IBM Plex Mono',monospace;
-                        color:#9ca3af;letter-spacing:.04em;">{row['sop_id']}</span>
-                    <span style="font-size:12px;color:#9ca3af;">·</span>
-                    <span style="font-size:12px;color:#9ca3af;">Page {int(row['page']) if pd.notna(row['page']) else '-'}</span>
-                    {feedback_tag}
-                  </div>
-                  <div style="font-size:17px;font-weight:700;color:#111827;line-height:1.4;">
-                    {highlighted_title}
-                  </div>
-                </div>
-                <div style="text-align:center;padding:8px 16px;background:{score_bg};
-                    border:1px solid {score_color}33;border-radius:9px;flex-shrink:0;">
-                  <div style="font-size:16px;font-weight:700;color:{score_color};">{label}</div>
-                  <div style="font-size:11px;font-weight:600;color:{score_color};
-                      text-transform:uppercase;letter-spacing:.05em;">
-                    {int(row['keyword_count'])} match{"es" if row['keyword_count'] != 1 else ""}
-                  </div>
-                </div>
-              </div>
-              <div style="font-size:14px;color:#374151;line-height:1.75;padding:12px 14px;
-                  background:#f9fafb;border-radius:8px;">
-                {highlighted_snippet}
-              </div>
-            </div>
-            """)
+            match_suffix = "es" if row["keyword_count"] != 1 else ""
+            match_count  = int(row["keyword_count"])
+            page_num     = int(row["page"]) if pd.notna(row["page"]) else "-"
+            score_border = score_color + "33"
+
+            card_html = (
+                f'<div style="{CARD}border-left:4px solid {score_color};">' +
+                f'<div style="display:flex;align-items:flex-start;justify-content:space-between;' +
+                f'flex-wrap:wrap;gap:12px;margin-bottom:12px;">' +
+                f'<div style="flex:1;">' +
+                f'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
+                f'<span style="font-size:12px;font-weight:700;font-family:IBM Plex Mono,monospace;' +
+                f'color:#9ca3af;letter-spacing:.04em;">{row["sop_id"]}</span>' +
+                f'<span style="font-size:12px;color:#9ca3af;">·</span>' +
+                f'<span style="font-size:12px;color:#9ca3af;">Page {page_num}</span>' +
+                feedback_tag +
+                f'</div>' +
+                f'<div style="font-size:17px;font-weight:700;color:#111827;line-height:1.4;">' +
+                highlighted_title +
+                f'</div></div>' +
+                f'<div style="text-align:center;padding:8px 16px;background:{score_bg};' +
+                f'border:1px solid {score_border};border-radius:9px;flex-shrink:0;">' +
+                f'<div style="font-size:16px;font-weight:700;color:{score_color};">{label}</div>' +
+                f'<div style="font-size:11px;font-weight:600;color:{score_color};' +
+                f'text-transform:uppercase;letter-spacing:.05em;">' +
+                f'{match_count} match{match_suffix}</div>' +
+                f'</div></div>' +
+                f'<div style="font-size:14px;color:#374151;line-height:1.75;padding:12px 14px;' +
+                f'background:#f9fafb;border-radius:8px;">' +
+                highlighted_snippet +
+                f'</div></div>'
+            )
+            render(card_html)
 
             # Feedback buttons
             if feedback_val is None:
