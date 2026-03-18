@@ -15,7 +15,7 @@ st.set_page_config(
     page_title="SOP Accessibility Search",
     page_icon="📄",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 # =========================================================
@@ -368,24 +368,20 @@ with st.sidebar:
 # Header
 # =========================================================
 inner_header = (
-    "<div style='display:flex;align-items:flex-start;justify-content:space-between;"
-    "flex-wrap:wrap;gap:16px;'>"
-    "<div style='max-width:680px;'>"
-    + overline("SOP Accessibility · HCI Research Prototype") +
+    overline("SOP Accessibility · HCI Research Prototype") +
     h2("SOP Accessibility Search", size="24px", mb="6px") +
     para("Keyword search across synthetic GMP-style SOPs. "
          "This is the baseline interface — no AI support layer. "
          "Results are ranked by keyword frequency across title, section, and body text.") +
-    "</div>"
-    "<div style='display:flex;flex-direction:column;gap:8px;min-width:200px;'>"
+    "<div style='margin-top:14px;'>"
     "<a href='" + STUDY_URL + "' target='_blank' rel='noopener noreferrer'"
-    " style='display:block;padding:12px 18px;background:#eff6ff;"
+    " style='display:inline-block;padding:10px 18px;background:#eff6ff;"
     "border:1px solid #bfdbfe;border-radius:10px;color:#1d4ed8;"
-    "font-size:14px;font-weight:700;text-decoration:none;text-align:center;'>"
+    "font-size:14px;font-weight:700;text-decoration:none;margin-right:10px;'>"
     "Participate in Study ↗</a>"
-    "<div style='font-size:12px;color:#9ca3af;text-align:center;line-height:1.5;'>"
-    "Try the prototype, then share feedback.</div>"
-    "</div></div>"
+    "<span style='font-size:12px;color:#9ca3af;'>"
+    "Try the prototype, then share feedback in the survey.</span>"
+    "</div>"
 )
 md(card(inner_header, "margin-bottom:14px;"))
 
@@ -492,6 +488,23 @@ if query:
             + str(pages) + "</strong> · sorted by relevance</div>"
             "<div style='margin-left:auto;font-size:13px;color:#6b7280;'>results "
             + str(start+1) + "–" + str(min(end,total)) + " of " + str(total) + "</div>"
+            "</div>"
+            "<div style='margin-top:12px;padding-top:12px;border-top:1px solid #f3f4f6;"
+            "display:flex;gap:12px;flex-wrap:wrap;align-items:center;'>"
+            "<span style='font-size:11px;font-weight:700;text-transform:uppercase;"
+            "letter-spacing:.07em;color:#9ca3af;margin-right:4px;'>Match strength</span>"
+            "<span style='display:inline-flex;align-items:center;gap:5px;"
+            "padding:3px 10px;background:#f0fdf4;border:1px solid #86efac;"
+            "border-radius:6px;font-size:12px;font-weight:600;color:#16a34a;'>"
+            "Strong  <span style='font-weight:400;color:#15803d;'>5+ keyword matches</span></span>"
+            "<span style='display:inline-flex;align-items:center;gap:5px;"
+            "padding:3px 10px;background:#fefce8;border:1px solid #fde68a;"
+            "border-radius:6px;font-size:12px;font-weight:600;color:#d97706;'>"
+            "Good  <span style='font-weight:400;color:#b45309;'>2–4 matches</span></span>"
+            "<span style='display:inline-flex;align-items:center;gap:5px;"
+            "padding:3px 10px;background:#f9fafb;border:1px solid #e5e7eb;"
+            "border-radius:6px;font-size:12px;font-weight:600;color:#6b7280;'>"
+            "Weak  <span style='font-weight:400;color:#9ca3af;'>1 match</span></span>"
             "</div>",
             "padding:14px 20px;"
         ))
