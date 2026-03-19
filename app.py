@@ -239,9 +239,11 @@ with sc:
         placeholder="e.g., sterility, bioburden, endotoxin, sampling",
     )
 with hc:
-    st.write("")  # vertical align
-    if st.button("🏠 Home", use_container_width=True):
-        go_home(); st.rerun()
+    # Show ✕ clear button only when there is input
+    if query:
+        st.write("")  # vertical align
+        if st.button("✕ Clear", use_container_width=True):
+            go_home(); st.rerun()
 
 # =========================================================
 # Suggestions
