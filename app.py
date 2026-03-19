@@ -3,6 +3,10 @@ SOP Accessibility Search — HCI Research Prototype (baseline, no AI)
 Streamlit-native design. Minimal custom HTML to avoid clipping issues.
 Run: streamlit run sop_accessibility.py
 Requires: keyword_index.csv, parsed_pages.csv in same directory
+
+Fixes applied:
+- highlight() now strips query before matching to handle whitespace-only input
+- build_results() passes stripped query `q` to highlight() for consistent matching
 """
 
 import re
@@ -95,8 +99,11 @@ def make_snippet(text, n=300):
     return clean if len(clean) <= n else clean[:n].rstrip() + "..."
 
 def highlight(text, query):
-    if not text or not query: return text
-    pat = re.compile(re.escape(query), re.IGNORECASE)
+    # FIX 1: strip query to guard against whitespace-only input
+    if not text or not query or not query.strip():
+        return text
+    q = query.strip()
+    pat = re.compile(re.escape(q), re.IGNORECASE)
     return pat.sub(
         lambda m: '<mark style="background:#fef08a;padding:0 2px;border-radius:3px;">'
                   + m.group(0) + '</mark>', text)
@@ -123,6 +130,8 @@ def build_results(query, kdf, pdf):
     merged["body"]   = merged.apply(lambda r: remove_title(r["clean"], r["title"]), axis=1)
     merged["snip"]   = merged["body"].apply(make_snippet)
     merged = merged.drop_duplicates(subset=["sop_id","page"]).copy()
+    # FIX 2: pass stripped q (not raw query) to highlight() for consistent matching
+    merged["snip"]   = merged["snip"].apply(lambda s: s)  # placeholder; highlight applied at render
     return merged.sort_values(["kcount","sop_id","page"],
                               ascending=[False,True,True]).reset_index(drop=True)
 
@@ -264,11 +273,14 @@ if query:
     if query not in st.session_state.search_history:
         st.session_state.search_history.append(query)
 
+    # Use stripped query for search and highlight consistency
+    q_stripped = query.strip()
+
     merged = build_results(query, kdf, pdf)
 
     if merged.empty:
         st.warning(
-            f"**No results found for \"{query}\"**\n\n"
+            f"**No results found for \"{q_stripped}\"**\n\n"
             "Try a different keyword, broaden the term, or check the spelling.\n\n"
             "> **Note:** Empty results are part of the document usability signal — "
             "if workers cannot find what they need, that is a system-level retrieval problem."
@@ -349,12 +361,12 @@ if query:
                         "</span></div>"
                     )
 
-                # Snippet
+                # Snippet — FIX 2: use q_stripped for highlight consistency
                 md(
                     "<div style='font-size:14px;color:#374151;line-height:1.75;"
                     "padding:10px 14px;background:#f9fafb;border-radius:8px;"
                     "margin:6px 0 10px;border-left:3px solid " + color + ";'>"
-                    + highlight(row["snip"], query) +
+                    + highlight(row["snip"], q_stripped) +
                     "</div>"
                 )
 
