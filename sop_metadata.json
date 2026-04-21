@@ -1,0 +1,47 @@
+{
+  "total_sops": 500,
+  "domains": {
+    "Analytical method validation": 50,
+    "Change control": 50,
+    "Cleaning validation": 50,
+    "Deviation & CAPA": 50,
+    "Environmental monitoring": 50,
+    "Equipment qualification": 50,
+    "In-process controls": 50,
+    "Raw material testing": 50,
+    "Stability studies": 50,
+    "Sterility testing": 50
+  },
+  "length_stats": {
+    "min": 229,
+    "max": 1951,
+    "mean": 679.1,
+    "median": 555
+  },
+  "cross_references": {
+    "total_refs": 347,
+    "sops_with_refs": 243,
+    "top_20_referenced": {
+      "QC_SOP_010": 18,
+      "QC_SOP_012": 12,
+      "QC_SOP_051": 10,
+      "QC_SOP_100": 10,
+      "QC_SOP_030": 8,
+      "QC_SOP_032": 8,
+      "QC_SOP_072": 8,
+      "QC_SOP_256": 8,
+      "QC_SOP_079": 6,
+      "QC_SOP_001": 5,
+      "QC_SOP_020": 5,
+      "QC_SOP_017": 5,
+      "QC_SOP_106": 5,
+      "QC_SOP_104": 5,
+      "QC_SOP_099": 5,
+      "QC_SOP_254": 5,
+      "QC_SOP_019": 4,
+      "QC_SOP_002": 4,
+      "QC_SOP_024": 4,
+      "QC_SOP_031": 4
+    }
+  }
+}
